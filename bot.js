@@ -18,7 +18,7 @@ bot.onText(/\/start/, (msg) => {
         [
           {
             text: 'Перейти в магазин',
-            url: 'https://starworkgames.github.io/telegram-shop-mini-app/'  // Замените на свою ссылку
+            web_app: { url: 'https://YOUR_USERNAME.github.io/your-repository-name/' }  // Замените на свою ссылку
           }
         ]
       ]
