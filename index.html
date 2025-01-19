@@ -191,13 +191,44 @@
         .admin-panel button:hover, .login-panel button:hover {
             background-color: #00796b;
         }
+        .payment-page {
+            padding: 20px;
+            background-color: white;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none; /* Скрываем страницу оплаты по умолчанию */
+        }
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+        .payment-button {
+            background-color: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .payment-button:hover {
+            background-color: #388e3c;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         Магазин
     </div>
-    
+
     <div id="products" class="products">
         <!-- Товары будут загружены через JavaScript -->
     </div>
@@ -209,6 +240,7 @@
     </div>
 
     <div id="admin-panel" class="admin-panel">
+        <button onclick="closeAdminPanel()" style="position: absolute; top: 10px; right: 10px; font-size: 20px; background: none; border: none; color: #333; cursor: pointer;">&times;</button>
         <h2>Редактирование товаров</h2>
         <input type="text" id="product-name" placeholder="Название товара">
         <input type="number" id="product-price" placeholder="Цена товара">
@@ -244,6 +276,19 @@
         <div class="reward">Награда 1</div>
         <div class="reward">Награда 2</div>
         <div class="reward">Награда 3</div>
+    </div>
+
+    <div id="payment-page" class="payment-page">
+        <h2>Оплата</h2>
+        <div id="payment-items"></div>
+        <div class="payment-item">
+            <span>Общая сумма:</span>
+            <span id="total-payment"></span>
+        </div>
+
+        <h3>Выберите способ оплаты:</h3>
+        <button onclick="payWithBitcoin()" class="payment-button">Bitcoin</button>
+        <button onclick="payWithLitecoin()" class="payment-button">Litecoin</button>
     </div>
 
     <script>
@@ -287,7 +332,32 @@
         }
 
         function openPayment() {
-            alert('Оплата успешна (функция в разработке)');
+            document.getElementById('payment-page').style.display = 'block';
+            document.getElementById('products').style.display = 'none';
+            document.getElementById('profile').style.display = 'none';
+            document.getElementById('rewards').style.display = 'none';
+
+            const paymentItemsContainer = document.getElementById('payment-items');
+            paymentItemsContainer.innerHTML = '';
+            cart.forEach(product => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'payment-item';
+                itemDiv.innerHTML = `
+                    <span>${product.name}</span>
+                    <span>${product.price}₽</span>
+                `;
+                paymentItemsContainer.appendChild(itemDiv);
+            });
+
+            document.getElementById('total-payment').innerText = `${totalAmount}₽`;
+        }
+
+        function payWithBitcoin() {
+            alert('Оплата через Bitcoin успешна!');
+        }
+
+        function payWithLitecoin() {
+            alert('Оплата через Litecoin успешна!');
         }
 
         function openAdminPanel() {
@@ -308,62 +378,60 @@
                 document.getElementById('login-panel').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'block';
             } else {
-                alert('Неверный логин или пароль');
+                alert('Неверный логин или пароль!');
             }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').style.display = 'none';
         }
 
         function addNewProduct() {
             const name = document.getElementById('product-name').value;
-            const price = parseInt(document.getElementById('product-price').value);
+            const price = parseFloat(document.getElementById('product-price').value);
             const image = document.getElementById('product-image').value;
+
             if (name && price && image) {
                 products.push({ name, price, image });
                 loadProducts();
-                alert('Товар добавлен!');
-                document.getElementById('admin-panel').style.display = 'none'; // Закрытие окна после добавления товара
+                document.getElementById('product-name').value = '';
+                document.getElementById('product-price').value = '';
+                document.getElementById('product-image').value = '';
             } else {
-                alert('Заполните все поля!');
+                alert('Пожалуйста, заполните все поля!');
             }
+        }
+
+        function showHome() {
+            document.getElementById('products').style.display = 'block';
+            document.getElementById('profile').style.display = 'none';
+            document.getElementById('rewards').style.display = 'none';
+            document.getElementById('payment-page').style.display = 'none';
+        }
+
+        function showProfile() {
+            document.getElementById('products').style.display = 'none';
+            document.getElementById('profile').style.display = 'block';
+            document.getElementById('rewards').style.display = 'none';
+            document.getElementById('payment-page').style.display = 'none';
+        }
+
+        function showRewards() {
+            document.getElementById('products').style.display = 'none';
+            document.getElementById('profile').style.display = 'none';
+            document.getElementById('rewards').style.display = 'block';
+            document.getElementById('payment-page').style.display = 'none';
         }
 
         function updateProfile() {
             document.getElementById('user-name').innerText = userName;
             document.getElementById('purchase-count').innerText = purchaseCount;
             document.getElementById('problem-count').innerText = problemCount;
-            document.getElementById('avg-check').innerText = (totalAmount / purchaseCount || 0).toFixed(2) + '₽';
-            document.getElementById('total-amount').innerText = totalAmount + '₽';
+            document.getElementById('avg-check').innerText = (totalAmount / purchaseCount).toFixed(2) + "₽";
+            document.getElementById('total-amount').innerText = totalAmount + "₽";
         }
 
-        function editName() {
-            const newName = document.getElementById('edit-name').value;
-            if (newName) {
-                userName = newName;
-                updateProfile();
-                alert('Имя обновлено!');
-            } else {
-                alert('Введите новое имя');
-            }
-        }
-
-        function showHome() {
-            document.getElementById('profile').style.display = 'none';
-            document.getElementById('rewards').style.display = 'none';
-            document.getElementById('products').style.display = 'flex';
-        }
-
-        function showProfile() {
-            document.getElementById('profile').style.display = 'block';
-            document.getElementById('rewards').style.display = 'none';
-            document.getElementById('products').style.display = 'none';
-        }
-
-        function showRewards() {
-            document.getElementById('rewards').style.display = 'block';
-            document.getElementById('profile').style.display = 'none';
-            document.getElementById('products').style.display = 'none';
-        }
-
-        tg.expand();
+        loadProducts();
     </script>
 </body>
 </html>
